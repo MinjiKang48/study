@@ -48,12 +48,24 @@ R-CNN의 동작 요약
 > ![img](https://blog.kakaocdn.net/dn/cgll5K/btqCgReUjoQ/esNXDDSkbnUgheY5AT2U2k/img.png)
 
 > **scale-invariant transformation**
+>
+> SIFT(Scale Invariant Feature Transform)
+>
+> : 이미지에서 지역적 특징을 검출하고 묘사하는 컴퓨터 비전에서 사용하는 feature 검출 알고리즘이다. 
+>
+> - 객체의 SIFT 핵심은 참조 이미지들에서 먼저 추출하고 데이터베이스에 저장하는 것이다.
+> - 객체는 새로운 이미지에서 이 데이터베이스까지의 각 feature를 개별로 비교하고 feature vectors의 유클리드 거리를 기반으로 한 feature와 맞는 후보를 찾음으로써 새로운 이미지로 인식된다. 
+>
+> - 이미지와 크기와 회전에 불변하는 특징을 추출하는 알고리즘
+> - 스케일이 축소된 일련의 이미지들(이미지 피라미드)에서 동일하게 검출되는 Scale Invariant한 Feature 추출
+> - 코너성을 측정하기 위해서는 DoG(Differnece of Gaussian)을 이용하여 스케일별 Laplacian(파플라시안 : n차원 실수 공간의 직교 좌표에 대한 미분연산자, 라플라스 연산자라고도 한다 기호 $\Delta$로 표시한다.) 계산
+> - 특징점이 풍부한 경우에 유리
 
-> **log-invariant transformation**
+> **log-scale transformation**
 
 모든 변환 함수는 입력으로 $p$를 갖는다.
 
--  $\hat{g_x} = p_wd_x(p)+p_x$
+- $\hat{g_x} = p_wd_x(p)+p_x$
 
 - $\hat{g_y}=p_hd_y(p)+p_y$
 
@@ -90,5 +102,37 @@ R-CNN과 다른 인식 모델에서 흔히 사용되는 몇몇 개의 트릭들�
 
 *Non-Maximum Suppression*
 
-같은 객체에서 여러 개의 bounding boxes를 찾을 수 있을 법하다. Non-max suppression은 같은 객체의 반복되는 인식을 피하는 것을 돕는다. 같은 객체의 카테고리에 대해 
+같은 객체에서 여러 개의 bounding boxes를 찾을 수 있을 법하다. Non-max suppression은 같은 객체의 반복되는 인식을 피하는 것을 돕는다. 같은 객체의 카테고리와 일치하는 bounding boxes의 집합을 얻고 난 후에 confidence score로 모든 bounding boxes를 정렬한다. 낮은 confidence scores의 boxes는 삭제한다. 남아있는 bounding box가 있는 동안, 가장 높은 점수의 박스를 하나 선택하는 것을 반복한다. 이전에 선택한 박스이면서 높은 IoU(> 0.5)를 가진 남아있는 박스들은 스킵한다.
+
+![Non-max suppression](https://lilianweng.github.io/lil-log/assets/images/non-max-suppression.png)
+
+- 이미지에서 여러 개의 bounding boxes가 차를 인식한다. non-maximum suppression을 하고 난 후, 가장 좋은 박스만 남았다. 그리고 선택된 하나의 박스와 함께 다른 박스들은 크게 겹치기 때문에 나머지는 무시되었다. 
+
+*Hard Negative Mining*
+
+bounding boxes는 객체가 부정적인 examples라는 것을 제외하고 있다고 고려한다. 모든 부정적인 examples가 똑같이 식별하기 어려운 것은 아니다. 예를 들어, 만약 부정적인 examples가 순수하게 비어있는 배경이라면, 그것은 "easy negative"라고 할 수 있다. 그러나 만약 박스가 이상한 노이즈 텍스쳐나 부분 객체를 포함한다면 객체를 인식하기 힘들 것이고 그것을 "hard negative"라고 한다.
+
+hard negative examples는 쉽게 분류되지 않는 것이라고 할 수 있다. 학습 루프 동안에 명백하게 false positive samples를 찾을 수 있고 분류 기능을 향상하기 위해서 training data에 포함시킬 수 있다. 
+
+
+
+---
+
+### Speed Bottleneck
+
+R-CNN 학습 단계
+
+​	R-CNN model 학습하는 것은 비싸고 느림을 알 수 있다. 
+
+1. 모든 이미지에 대해서 2000 지역 후보를 제안하기 위해서 selective search를 실행한다.
+
+2. 모든 이미지 지역에 대해서 CNN feature vector를 생성한다. (N개의 이미지 * 2000)
+
+3. 모든 프로세스는 공유하지 않은 세 가지의 모델을 따로 포함한다. 
+
+   1. 이미지 분류와 feature 추출을 위한 convolution neural network
+   2. 타겟 객체를 식별하기 위한 top SVM 분류기
+   3. 지역 bounding boxes를 더 좁히기 위한 regression model
+
+   
 
