@@ -4,8 +4,21 @@
 
 - 2가지의 메인 아이디어
 
-1. selective search를 이용하여 관리할 수 있는 bounding-box 객체 지역 후보("region or interest" or "RoI") 의 수를 식별한다
+1. selective search를 이용하여 관리할 수 있는 bounding-box 객체 지역 후보("region of interest" or "RoI"; 객체의 위치) 의 수를 식별한다
+
 2. 각각의 bounding-box를 분류하기 위해서 각 지역에서의 CNN features를 추출한다
+
+   > *region of interest*	객체의 위치
+   >
+   > *region proposal*	객체의 위치를 찾는 일
+   >
+   > *region classification*	객체를 분류하는 일
+   >
+   > *selective search algorithm*	segementation 분야에 많이 쓰이는 알고리즘이며, 객체와 주변간의 색감(color), 질감(texture) 차이, 다른 객체에 애워쌓여있는지(enclosed) 여부 등을 파악해서 다양한 전략으로 물체의 위치를 파악할 수 있도록 하는 알고리즘
+   >
+   > cf) sliding window
+   >
+   > 
 
 ![Architecture of R-CNN](https://lilianweng.github.io/lil-log/assets/images/RCNN.png)
 
